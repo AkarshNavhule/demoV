@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import clientPromise from "../../../lib/mongodb";
 
-export default NextAuth({
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -14,13 +14,10 @@ export default NextAuth({
     async signIn({ user }) {
       try {
         const client = await clientPromise;
-        const db = client.db("demo1");
+        const db = client.db("demo");
         const users = db.collection("users");
-
-        // Check if the user exists
         const existingUser = await users.findOne({ email: user.email });
         if (!existingUser) {
-          // Save new user into the database
           await users.insertOne({
             name: user.name,
             email: user.email,
@@ -36,4 +33,6 @@ export default NextAuth({
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+export default NextAuth(authOptions);
